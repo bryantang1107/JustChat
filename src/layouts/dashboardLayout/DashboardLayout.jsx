@@ -2,6 +2,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import "./dashboardLayout.css";
 import { useAuth } from "@clerk/clerk-react";
 import { useEffect } from "react";
+import Sidebar from "../../components/Sidebar/Sidebar";
 const DashboardLayout = () => {
   const { userId, isLoaded } = useAuth();
 
@@ -18,8 +19,10 @@ const DashboardLayout = () => {
   }
 
   return (
-    <div>
-      <div className="menu">MENU</div>
+    <div className="dashboardLayout">
+      <div className="menu">
+        <Sidebar></Sidebar>
+      </div>
       <div className="content">
         <Outlet />
       </div>

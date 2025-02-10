@@ -2,9 +2,7 @@
   padding: 16px 64px;
   display: flex;
   flex-direction: column;
-  @media screen and (max-width: 1024px) {
-    padding: 0px;
-  }
+
   header {
     display: flex;
     align-items: center;
@@ -24,5 +22,6 @@
 
   main {
     flex: 1;
+    overflow: hidden;
   }
 }
