@@ -11,8 +11,11 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.22.11",
+    "@google/generative-ai": "^0.21.0",
+    "imagekitio-react": "^4.2.0",
     "react": "19.0.0-rc-8b08e99e-20240713",
     "react-dom": "19.0.0-rc-8b08e99e-20240713",
+    "react-markdown": "^9.0.3",
     "react-router-dom": "^7.1.5",
     "react-type-animation": "^3.2.0"
   },

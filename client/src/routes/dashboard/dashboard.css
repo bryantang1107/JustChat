@@ -1,0 +1,65 @@
+.dashboard {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  .texts {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 50%;
+    gap: 50px;
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      opacity: 0.2;
+
+      img {
+        width: 64px;
+        height: 64px;
+      }
+
+      h1 {
+        font-size: 64px;
+        font-style: normal;
+        background: linear-gradient(to right, #217bfe, #e55571);
+        background-clip: text;
+        --webkit-background-clip: text;
+        color: transparent;
+      }
+    }
+
+    .options {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 50px;
+
+      .option {
+        height: 100%;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        font-weight: 300;
+        font-size: 14px;
+        padding: 20px;
+        border: 1px solid #555;
+        border-radius: 20px;
+        img {
+          width: 50px;
+          height: 40px;
+          object-fit: cover;
+        }
+      }
+    }
+  }
+}
