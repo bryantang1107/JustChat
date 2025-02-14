@@ -23,6 +23,13 @@
     flex-direction: column;
     overflow: auto;
 
+    .chat-title {
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     &::-webkit-scrollbar {
       width: 8px; /* Adjust scrollbar width */
     }

@@ -4,23 +4,43 @@ import Upload from "../upload/Upload";
 import { IKImage } from "imagekitio-react";
 import model from "../../lib/gemini";
 import Markdown from "react-markdown";
+import axios from "../../axios.js";
+import { useAuth } from "@clerk/clerk-react";
 const NewPrompt = () => {
   const endRef = useRef(null);
   const [prompt, setPrompt] = useState("");
   const [answer, setAnswer] = useState("");
+  const { userId } = useAuth();
   const [img, setImg] = useState({
     isLoading: false,
     error: "",
     dbData: {},
     aiData: {},
   });
+  const chat = model.startChat({
+    history: [
+      {
+        role: "user",
+        parts: [{ text: "Hello" }],
+      },
+      {
+        role: "model",
+        parts: [{ text: "Great to meet you. What would you like to know?" }],
+      },
+    ],
+  });
 
   const askAI = async (prompt) => {
     setPrompt(prompt);
-    const result = await model.generateContent(
+    const result = await chat.sendMessageStream(
       Object.entries(img.aiData).length ? [img.aiData, prompt] : [prompt]
     );
-    setAnswer(result.response.text());
+    let accumulatedText = "";
+    for await (const chunk of result.stream) {
+      const chunkText = chunk.text();
+      accumulatedText += chunkText;
+      setAnswer(accumulatedText);
+    }
     setImg({
       isLoading: false,
       error: "",
@@ -34,6 +54,20 @@ const NewPrompt = () => {
 
     const prompt = e.target.text.value;
     if (!prompt) return;
+    const response = await axios.post(
+      "/api/chats",
+      {
+        userId,
+        text: prompt,
+      },
+      {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
     askAI(prompt);
     e.target.text.value = "";
   };

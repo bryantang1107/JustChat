@@ -1,7 +1,45 @@
-import NewPrompt from "../../components/newPrompt/NewPrompt";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import "./dashboard.css";
+import { useNavigate } from "react-router-dom";
+import axios from "../../axios.js";
 
 const Dashboard = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  const createNewChat = async (text) => {
+    const { data } = await axios.post(
+      "/api/chats",
+      {
+        text,
+      },
+      {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return data;
+  };
+
+  const mutation = useMutation({
+    mutationFn: (text) => {
+      return createNewChat(text);
+    },
+    onSuccess: (id) => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["userChats"] });
+      navigate(`/dashboard/chats/${id}`);
+    },
+  });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const text = e.target.text.value;
+    if (!text) return;
+
+    mutation.mutate(text);
+  };
   return (
     <div className="dashboard">
       <div className="texts">
@@ -24,7 +62,14 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-      <NewPrompt />
+      <div className="formContainer">
+        <form onSubmit={handleSubmit}>
+          <input type="text" name="text" placeholder="Ask me anything..." />
+          <button>
+            <img src="/arrow.png" alt="" />
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

@@ -1,7 +1,20 @@
 import { Link } from "react-router-dom";
 import "./sidebar.css";
+import { useQuery } from "@tanstack/react-query";
+import axios from "../../axios.js";
 
 const Sidebar = () => {
+  const fetchData = async () => {
+    const { data } = await axios.get("/api/chats", {
+      withCredentials: true,
+    });
+    return data;
+  };
+  const { isPending, error, data } = useQuery({
+    queryKey: ["userChats"],
+    queryFn: () => fetchData(),
+  });
+
   return (
     <div className="chatList">
       <span className="title">DASHBOARD</span>
@@ -11,7 +24,15 @@ const Sidebar = () => {
       <hr />
       <span className="title">RECENT CHATS</span>
       <div className="list">
-        <Link to={`/dashboard/chats/test`}>TO</Link>
+        {isPending
+          ? "Loading..."
+          : error
+          ? "Something went wrong!"
+          : data?.map((chat) => (
+              <Link to={`/dashboard/chats/${chat._id}`} key={chat._id}>
+                <p className="chat-title">{chat.title}</p>
+              </Link>
+            ))}
       </div>
       <hr />
       <div className="upgrade">
