@@ -32,6 +32,10 @@ const Dashboard = () => {
       queryClient.invalidateQueries({ queryKey: ["userChats"] });
       navigate(`/dashboard/chats/${id}`);
     },
+
+    onError: (error) => {
+      console.log(error);
+    },
   });
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,7 +49,7 @@ const Dashboard = () => {
       <div className="texts">
         <div className="logo">
           <img src="/logo.png" alt="logo" />
-          <h1>BT Chat</h1>
+          <h1>JustChat</h1>
         </div>
         <div className="options">
           <div className="option">

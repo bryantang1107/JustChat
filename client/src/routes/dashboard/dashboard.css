@@ -63,6 +63,14 @@
           height: 40px;
           object-fit: cover;
         }
+
+        @media (max-width: 970px) {
+          width: 300px;
+        }
+      }
+
+      @media (max-width: 970px) {
+        flex-direction: column;
       }
     }
   }

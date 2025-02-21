@@ -1,4 +1,4 @@
-import { IKContext, IKImage, IKUpload } from "imagekitio-react";
+import { IKContext, IKUpload } from "imagekitio-react";
 import { useRef } from "react";
 import axios from "../../axios.js";
 
@@ -6,16 +6,14 @@ const urlEndpoint = import.meta.env.VITE_IMAGE_KIT_ENDPOINT;
 const publicKey = import.meta.env.VITE_IMAGE_KIT_PUBLIC_KEY;
 const authenticator = async () => {
   try {
-    const response = await axios.get("/api/upload");
+    const { status, data } = await axios.get("/api/upload", {
+      withCredentials: true,
+    });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(
-        `Request failed with status ${response.status}: ${errorText}`
-      );
+    if (status !== 200) {
+      throw new Error(`Request failed with status ${status}: ${data}`);
     }
 
-    const data = await response.json();
     const { signature, expire, token } = data;
     return { signature, expire, token };
   } catch (error) {

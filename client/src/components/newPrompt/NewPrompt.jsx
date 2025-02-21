@@ -5,12 +5,14 @@ import { IKImage } from "imagekitio-react";
 import model from "../../lib/gemini";
 import Markdown from "react-markdown";
 import axios from "../../axios.js";
-import { useAuth } from "@clerk/clerk-react";
-const NewPrompt = () => {
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+const NewPrompt = ({ data }) => {
   const endRef = useRef(null);
   const [prompt, setPrompt] = useState("");
   const [answer, setAnswer] = useState("");
-  const { userId } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [isChange, setIsChange] = useState(false);
+  const stopRef = useRef(false);
   const [img, setImg] = useState({
     isLoading: false,
     error: "",
@@ -18,47 +20,83 @@ const NewPrompt = () => {
     aiData: {},
   });
   const chat = model.startChat({
-    history: [
-      {
-        role: "user",
-        parts: [{ text: "Hello" }],
-      },
-      {
-        role: "model",
-        parts: [{ text: "Great to meet you. What would you like to know?" }],
-      },
-    ],
+    history: data?.history.map(({ role, parts }) => ({
+      role: role,
+      parts: [{ text: parts[0].text }],
+    })),
+    generationConfig: {
+      // maxOutputTokens: 100,
+    },
   });
 
-  const askAI = async (prompt) => {
-    setPrompt(prompt);
-    const result = await chat.sendMessageStream(
-      Object.entries(img.aiData).length ? [img.aiData, prompt] : [prompt]
-    );
-    let accumulatedText = "";
-    for await (const chunk of result.stream) {
-      const chunkText = chunk.text();
-      accumulatedText += chunkText;
-      setAnswer(accumulatedText);
+  useEffect(() => {
+    if (loading) {
+      stopRef.current = true;
+      setAnswer("");
+      setPrompt("");
+      console.log("STOP");
     }
-    setImg({
-      isLoading: false,
-      error: "",
-      dbData: {},
-      aiData: {},
-    });
+  }, [data]);
+
+  useEffect(() => {
+    endRef.current.scrollIntoView({ behavior: "smooth" });
+  }, [data, prompt, answer, img.dbData]);
+
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: () => {
+      return createNewChat();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chat", data._id] });
+    },
+    onError: (err) => {
+      console.log(err);
+    },
+  });
+  const askAI = async (prompt, isInitial) => {
+    if (!isInitial) setPrompt(prompt);
+    setLoading(true);
+    try {
+      const result = await chat.sendMessageStream(
+        Object.entries(img.aiData).length ? [img.aiData, prompt] : [prompt]
+      );
+      let accumulatedText = "";
+      for await (const chunk of result.stream) {
+        if (stopRef.current) break;
+        const chunkText = chunk.text();
+        accumulatedText += chunkText;
+        setAnswer(accumulatedText);
+      }
+
+      mutation.mutate();
+    } catch (error) {
+      console.log(error);
+    }
+    setLoading(false);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    if (loading) return;
     const prompt = e.target.text.value;
     if (!prompt) return;
-    const response = await axios.post(
-      "/api/chats",
+    e.target.text.value = "";
+    await askAI(prompt, false);
+  };
+
+  const createNewChat = async () => {
+    if (isChange) {
+      setIsChange(false);
+      return;
+    }
+    const { data: newData } = await axios.put(
+      `/api/chats/${data._id}`,
       {
-        userId,
-        text: prompt,
+        prompt: prompt.length ? prompt : undefined,
+        answer,
+        img: img.dbData?.filePath || undefined,
       },
       {
         withCredentials: true,
@@ -67,24 +105,32 @@ const NewPrompt = () => {
         },
       }
     );
-
-    askAI(prompt);
-    e.target.text.value = "";
+    return newData;
   };
 
+  const hasRun = useRef(false);
+
   useEffect(() => {
-    endRef.current.scrollIntoView({ behavior: "smooth" });
-  }, [prompt, answer, img.dbData]);
+    if (!hasRun.current) {
+      if (data?.history?.length === 1) {
+        askAI(data.history[0].parts[0].text, true);
+      }
+    }
+    hasRun.current = true;
+  }, []);
+
   return (
     <>
       {img.isLoading && <div>Loading...</div>}
       {img.dbData?.filePath && (
-        <IKImage
-          urlEndpoint={import.meta.env.VITE_IMAGE_KIT_ENDPOINT}
-          path={img.dbData?.filePath}
-          width="380"
-          transformation={[{ width: 380 }]}
-        />
+        <div className="chat-image message user">
+          <IKImage
+            urlEndpoint={import.meta.env.VITE_IMAGE_KIT_ENDPOINT}
+            path={img.dbData?.filePath}
+            width="380"
+            transformation={[{ width: 380 }]}
+          />
+        </div>
       )}
       {prompt && <div className="message user">{prompt}</div>}
       {answer && (

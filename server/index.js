@@ -31,12 +31,14 @@ const imagekit = new ImageKit({
   privateKey: process.env.IMAGE_KIT_PRIVATE_KEY,
 });
 
-app.get("/api/upload", (req, res) => {
+app.get("/api/upload", ClerkExpressRequireAuth(), (req, res) => {
   const result = imagekit.getAuthenticationParameters();
   res.send(result);
 });
 
 app.post("/api/chats", ClerkExpressRequireAuth(), async (req, res) => {
+  console.log("Request received");
+
   const userId = req.auth.userId;
   const { text } = req.body;
   try {
@@ -75,9 +77,8 @@ app.post("/api/chats", ClerkExpressRequireAuth(), async (req, res) => {
           },
         }
       );
-
-      res.status(201).send(newChat._id);
     }
+    res.status(201).send(newChat._id);
   } catch (error) {
     console.log(error);
     res.status(500).send("Error creating chat!");
@@ -105,6 +106,44 @@ app.get("/api/chats/:id", ClerkExpressRequireAuth(), async (req, res) => {
   try {
     const chat = await Chat.findOne({ _id: req.params.id, userId });
     res.status(200).send(chat);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Error fetching User Chat!");
+  }
+});
+
+app.put("/api/chats/:id", ClerkExpressRequireAuth(), async (req, res) => {
+  const userId = req.auth.userId;
+
+  const { prompt, answer, img } = req.body;
+
+  const newItems = [
+    ...(prompt
+      ? [
+          {
+            role: "user",
+            parts: [{ text: prompt }],
+            img,
+          },
+        ]
+      : []),
+    {
+      role: "model",
+      parts: [{ text: answer }],
+    },
+  ];
+  try {
+    const updatedChat = await Chat.updateOne(
+      { _id: req.params.id, userId },
+      {
+        $push: {
+          history: {
+            $each: newItems,
+          },
+        },
+      }
+    );
+    res.status(200).send(updatedChat);
   } catch (error) {
     console.log(error);
     res.status(500).send("Error fetching User Chat!");

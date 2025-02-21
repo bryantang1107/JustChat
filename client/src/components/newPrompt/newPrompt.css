@@ -39,3 +39,8 @@
     }
   }
 }
+
+.chat-image {
+  display: flex;
+  justify-content: flex-end;
+}

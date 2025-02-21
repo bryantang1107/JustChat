@@ -23,7 +23,7 @@ const RootLayout = () => {
           <header>
             <Link to="/" className="logo">
               <img src="/logo.png" alt="" />
-              <span>BT CHAT</span>
+              <span>JustChat</span>
             </Link>
             <div className="user">
               <SignedIn>

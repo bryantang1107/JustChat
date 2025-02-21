@@ -9,6 +9,8 @@ import SignUp from "./routes/signup/SignUp.jsx";
 import Chat from "./routes/chat/Chat.jsx";
 import RootLayout from "./layouts/rootLayout/RootLayout.jsx";
 import DashboardLayout from "./layouts/dashboardLayout/DashboardLayout.jsx";
+import Version from "./routes/about/Version.jsx";
+import About from "./routes/about/About.jsx";
 
 const router = createBrowserRouter([
   {
@@ -24,6 +26,14 @@ const router = createBrowserRouter([
           {
             path: "/dashboard",
             element: <Dashboard />,
+          },
+          {
+            path: "/dashboard/justchat",
+            element: <Version />,
+          },
+          {
+            path: "/dashboard/about",
+            element: <About />,
           },
           {
             path: "/dashboard/chats/:id",

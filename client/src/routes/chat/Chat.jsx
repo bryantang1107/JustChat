@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./chat.css";
 import NewPrompt from "../../components/newPrompt/NewPrompt";
 import { useLocation } from "react-router-dom";
@@ -9,7 +9,6 @@ import { IKImage } from "imagekitio-react";
 
 const Chat = () => {
   const endRef = useRef(null);
-
   const chatId = useLocation().pathname.split("/").pop();
   const fetchData = async () => {
     const { data } = await axios.get(`/api/chats/${chatId}`, {
@@ -24,12 +23,12 @@ const Chat = () => {
 
   useEffect(() => {
     endRef.current.scrollIntoView({ behavior: "smooth" });
-  }, []);
+  }, [chatId]);
+
   return (
     <div className="chatPage">
       <div className="wrapper">
         <div className="chat">
-          <div className="message">Text message from ai</div>
           {isPending
             ? "Loading..."
             : error
@@ -54,7 +53,7 @@ const Chat = () => {
                 </div>
               ))}
 
-          <NewPrompt />
+          {data && <NewPrompt data={data} />}
           <div ref={endRef}></div>
         </div>
       </div>

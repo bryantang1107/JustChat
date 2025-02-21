@@ -11,8 +11,8 @@ const Home = () => {
       <section className="hero">
         <img src="/orbital.png" alt="" className="orbital" />
         <div className="left">
-          <h1>BT CHAT</h1>
-          <h2>Welcome to BT Chat!</h2>
+          <h1>JustChat</h1>
+          <h2>Welcome to JustChat!</h2>
           <h3>
             🚀 Chat Smarter with AI - Your Personal Assistant Powered by Gemini!
           </h3>
@@ -73,7 +73,7 @@ const Home = () => {
 
       <section className="footer">
         <img src="/logo.png" alt="logo" />
-        <i className="copyright">© 2025 BT Chat. All Rights Reserved.</i>
+        <i className="copyright">© 2025 JustChat. All Rights Reserved.</i>
         <div className="links">
           <Link to="/">Terms of Service</Link>
           <Link to="/">Privacy</Link>

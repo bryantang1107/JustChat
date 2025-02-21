@@ -29,6 +29,9 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+    .active {
+      background-color: #2c2937;
+    }
 
     &::-webkit-scrollbar {
       width: 8px; /* Adjust scrollbar width */
