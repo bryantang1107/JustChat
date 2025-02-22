@@ -37,8 +37,6 @@ app.get("/api/upload", ClerkExpressRequireAuth(), (req, res) => {
 });
 
 app.post("/api/chats", ClerkExpressRequireAuth(), async (req, res) => {
-  console.log("Request received");
-
   const userId = req.auth.userId;
   const { text } = req.body;
   try {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import "./chat.css";
 import NewPrompt from "../../components/newPrompt/NewPrompt";
 import { useLocation } from "react-router-dom";
@@ -17,7 +17,7 @@ const Chat = () => {
     return data;
   };
   const { isPending, error, data } = useQuery({
-    queryKey: [chatId],
+    queryKey: [chatId, chatId],
     queryFn: () => fetchData(),
   });
 

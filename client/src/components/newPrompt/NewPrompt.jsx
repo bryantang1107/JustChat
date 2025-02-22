@@ -6,19 +6,25 @@ import model from "../../lib/gemini";
 import Markdown from "react-markdown";
 import axios from "../../axios.js";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "react-router-dom";
 const NewPrompt = ({ data }) => {
   const endRef = useRef(null);
+  const location = useLocation();
+  const prevPathname = useRef(location.pathname);
+  const stopRef = useRef(false);
+  const queryClient = useQueryClient();
+  const chatHistory = useRef({});
+
   const [prompt, setPrompt] = useState("");
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isChange, setIsChange] = useState(false);
-  const stopRef = useRef(false);
   const [img, setImg] = useState({
     isLoading: false,
     error: "",
     dbData: {},
     aiData: {},
   });
+
   const chat = model.startChat({
     history: data?.history.map(({ role, parts }) => ({
       role: role,
@@ -30,67 +36,36 @@ const NewPrompt = ({ data }) => {
   });
 
   useEffect(() => {
-    if (loading) {
-      stopRef.current = true;
-      setAnswer("");
-      setPrompt("");
-      console.log("STOP");
-    }
-  }, [data]);
-
-  useEffect(() => {
     endRef.current.scrollIntoView({ behavior: "smooth" });
   }, [data, prompt, answer, img.dbData]);
 
-  const queryClient = useQueryClient();
-
-  const mutation = useMutation({
-    mutationFn: () => {
-      return createNewChat();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["chat", data._id] });
-    },
-    onError: (err) => {
-      console.log(err);
-    },
-  });
-  const askAI = async (prompt, isInitial) => {
-    if (!isInitial) setPrompt(prompt);
-    setLoading(true);
-    try {
-      const result = await chat.sendMessageStream(
-        Object.entries(img.aiData).length ? [img.aiData, prompt] : [prompt]
-      );
-      let accumulatedText = "";
-      for await (const chunk of result.stream) {
-        if (stopRef.current) break;
-        const chunkText = chunk.text();
-        accumulatedText += chunkText;
-        setAnswer(accumulatedText);
+  //Remove from PROD
+  const hasRun = useRef(false);
+  useEffect(() => {
+    if (!hasRun.current) {
+      if (data?.history?.length === 1) {
+        //if history only contain one item (prompt)
+        askAI(data.history[0].parts[0].text, true);
       }
-
-      mutation.mutate();
-    } catch (error) {
-      console.log(error);
     }
-    setLoading(false);
-  };
+    hasRun.current = true;
+  }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (loading) return;
-    const prompt = e.target.text.value;
-    if (!prompt) return;
-    e.target.text.value = "";
-    await askAI(prompt, false);
-  };
+  useEffect(() => {
+    if (prevPathname.current !== location.pathname) {
+      if (chatHistory.current[data._id]) {
+        setPrompt(chatHistory.current[data._id].prompt);
+        setAnswer(chatHistory.current[data._id].answer);
+      } else {
+        //prevents answer from displaying in other chat
+        setPrompt("");
+        setAnswer("");
+      }
+    }
+    prevPathname.current = location.pathname;
+  }, [location.pathname]);
 
   const createNewChat = async () => {
-    if (isChange) {
-      setIsChange(false);
-      return;
-    }
     const { data: newData } = await axios.put(
       `/api/chats/${data._id}`,
       {
@@ -108,16 +83,50 @@ const NewPrompt = ({ data }) => {
     return newData;
   };
 
-  const hasRun = useRef(false);
+  const mutation = useMutation({
+    mutationFn: () => createNewChat(),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["chat", data._id] }),
+    onError: (err) => console.log(err),
+  });
 
-  useEffect(() => {
-    if (!hasRun.current) {
-      if (data?.history?.length === 1) {
-        askAI(data.history[0].parts[0].text, true);
+  const askAI = async (prompt, isInitial) => {
+    if (!isInitial) setPrompt(prompt);
+    stopRef.current = false;
+    try {
+      const result = await chat.sendMessageStream(
+        Object.entries(img.aiData).length ? [img.aiData, prompt] : [prompt]
+      );
+      let accumulatedText = "";
+      for await (const chunk of result.stream) {
+        if (stopRef.current) return;
+        const chunkText = chunk.text();
+        accumulatedText += chunkText;
+        setAnswer(accumulatedText);
+        chatHistory.current[data._id] = { prompt, answer: accumulatedText };
       }
+
+      mutation.mutate();
+    } catch (error) {
+      console.log(error);
     }
-    hasRun.current = true;
-  }, []);
+  };
+
+  const stopAI = () => {
+    stopRef.current = true;
+    setLoading(false);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (loading) return;
+    const prompt = e.target.text.value;
+    if (!prompt) return;
+    e.target.text.value = "";
+    setLoading(true);
+    await askAI(prompt, false);
+    setLoading(false);
+  };
 
   return (
     <>
@@ -142,9 +151,15 @@ const NewPrompt = ({ data }) => {
       <form className="newForm" onSubmit={handleSubmit}>
         <Upload setImg={setImg} />
         <input type="text" name="text" placeholder="Ask me anything..." />
-        <button>
-          <img src="/arrow.png" alt="" />
-        </button>
+        {!loading ? (
+          <button>
+            <img src="/arrow.png" alt="" />
+          </button>
+        ) : (
+          <button onClick={stopAI}>
+            <img src="/stop.svg" alt="" />
+          </button>
+        )}
       </form>
     </>
   );
