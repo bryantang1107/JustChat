@@ -29,6 +29,7 @@ const Sidebar = () => {
       <Link to="/dashboard">Create a new Chat</Link>
       <Link to="/dashboard/about">About JustChat</Link>
       <Link to="/dashboard/justchat">Release Notes</Link>
+      <Link to="/dashboard/feature">Coming Soon!</Link>
       <hr />
       <span className="title">RECENT CHATS</span>
       <div className="list">
@@ -53,8 +54,8 @@ const Sidebar = () => {
       <div className="upgrade">
         <img src="/logo.png" alt="" />
         <div className="texts">
-          <span>Upgrade to Pro</span>
-          <span>Unlock all models + increase rate limit</span>
+          <span>JustChat</span>
+          <span>The only AI Chat Bot you need.</span>
         </div>
       </div>
     </div>

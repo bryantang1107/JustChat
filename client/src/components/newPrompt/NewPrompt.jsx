@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import "./newPrompt.css";
 import Upload from "../upload/Upload";
 import { IKImage } from "imagekitio-react";
-import model from "../../lib/gemini";
+import models from "../../lib/gemini";
 import Markdown from "react-markdown";
 import axios from "../../axios.js";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
+import Select from "react-select";
+import { modelOptions } from "../../constant.js";
 const NewPrompt = ({ data }) => {
   const endRef = useRef(null);
   const location = useLocation();
@@ -18,6 +20,7 @@ const NewPrompt = ({ data }) => {
   const [prompt, setPrompt] = useState("");
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
+  const [selectedModel, setSelectedModel] = useState(modelOptions[0]);
   const [img, setImg] = useState({
     isLoading: false,
     error: "",
@@ -25,7 +28,7 @@ const NewPrompt = ({ data }) => {
     aiData: {},
   });
 
-  const chat = model.startChat({
+  const chat = models[selectedModel.value]?.startChat({
     history: data?.history.map(({ role, parts }) => ({
       role: role,
       parts: [{ text: parts[0].text }],
@@ -127,7 +130,6 @@ const NewPrompt = ({ data }) => {
     await askAI(prompt, false);
     setLoading(false);
   };
-
   return (
     <>
       {img.isLoading && <div>Loading...</div>}
@@ -149,17 +151,28 @@ const NewPrompt = ({ data }) => {
       )}
       <div className="endChat" ref={endRef}></div>
       <form className="newForm" onSubmit={handleSubmit}>
-        <Upload setImg={setImg} />
-        <input type="text" name="text" placeholder="Ask me anything..." />
-        {!loading ? (
-          <button>
-            <img src="/arrow.png" alt="" />
-          </button>
-        ) : (
-          <button onClick={stopAI}>
-            <img src="/stop.svg" alt="" />
-          </button>
-        )}
+        <div className="input">
+          <Upload setImg={setImg} />
+          <input type="text" name="text" placeholder="Ask me anything..." />
+          {!loading ? (
+            <button>
+              <img src="/arrow.png" alt="" />
+            </button>
+          ) : (
+            <button onClick={stopAI}>
+              <img src="/stop.svg" alt="" />
+            </button>
+          )}
+        </div>
+        <div className="custom">
+          <Select
+            defaultValue={selectedModel}
+            placeholder={modelOptions[0].label}
+            onChange={setSelectedModel}
+            options={modelOptions}
+            menuPlacement="top"
+          />
+        </div>
       </form>
     </>
   );

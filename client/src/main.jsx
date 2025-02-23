@@ -11,6 +11,7 @@ import RootLayout from "./layouts/rootLayout/RootLayout.jsx";
 import DashboardLayout from "./layouts/dashboardLayout/DashboardLayout.jsx";
 import Version from "./routes/about/Version.jsx";
 import About from "./routes/about/About.jsx";
+import Feature from "./routes/about/Feature.jsx";
 
 const router = createBrowserRouter([
   {
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
           {
             path: "/dashboard/about",
             element: <About />,
+          },
+          {
+            path: "/dashboard/feature",
+            element: <Feature />,
           },
           {
             path: "/dashboard/chats/:id",

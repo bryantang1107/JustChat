@@ -11,17 +11,47 @@ const Version = () => {
           </div>
           <div className="message">
             <p className="about">
-              <b>Coming soon!</b>
+              <b>Version 1.1.0</b>
             </p>
             <hr></hr>
             <br></br>
-            <b>🔄 Multi-Model Integration</b>
+            <b>🔄 Multi-Model Integration Support</b>
             <p className="about">
-              Soon, JustChat will support multiple AI models, allowing users to
-              choose the model that best fits their needs. Whether you want
-              speed, depth, or creativity, you&apos;ll have the power to switch
-              between different AI engines for a customized chat experience.
-              Stay tuned! 🚀
+              Fine-Tuned AI Chat Model with Multi-Model Support Our AI-powered
+              chat model is a highly optimized, fine-tuned conversational
+              assistant designed to deliver fast, intelligent, and context-aware
+              responses. It seamlessly integrates multiple Gemini models,
+              allowing users to choose the best model for their needs: With
+              dynamic model selection, users can tailor their experience based
+              on speed, accuracy, and cost-effectiveness, ensuring the best
+              AI-driven interactions for any use case.
+            </p>
+            <ul>
+              <li>
+                Gemini 1.5 Flash – Ultra-fast response times, ideal for
+                real-time conversations.
+              </li>
+              <li>
+                Gemini 1.5 Pro – Enhanced reasoning and accuracy for complex
+                queries.
+              </li>
+              <li>
+                Gemini 2.0 Lite – Cost-efficient and lightweight for scalable
+                applications.
+              </li>
+              <li>
+                Gemini 2.0 Flash – Optimized for low-latency, high-speed
+                interactions.
+              </li>
+              <li>
+                Gemini 2.0 Flash (Experimental) - Advanced reasoning with an
+                explainable thought process.
+              </li>
+            </ul>
+            <br></br>
+            <p className="about">
+              🚀 Experience the power of AI with flexible and intelligent model
+              switching!
             </p>
             <br></br>
             <p className="about">
